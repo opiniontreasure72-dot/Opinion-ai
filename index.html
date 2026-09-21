@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Happy Chat — a social website with Opinion, its AI assistant.">
+<meta name="theme-color" content="#1877f2">
+<meta name="color-scheme" content="light dark">
+<title>Happy Chat — with Opinion AI</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%231877f2%22/><text x=%2250%22 y=%2268%22 font-size=%2250%22 fill=%22white%22 text-anchor=%22middle%22 font-family=%22Arial%22>HC</text></svg>">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check-compat.js"></script>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:Segoe UI,Arial,sans-serif;
+  background:linear-gradient(120deg,#89f7fe,#66a6ff);
+  min-height:100vh;
+  color:#050505;
+}
+
+body.dark{
+  background:#18191a;
+  color:#e4e6eb;
+}
+
+header{
+  background:#fff;
+  padding:10px 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  box-shadow:0 1px 4px rgba(0,0,0,.2);
+  position:sticky;
+  top:0;
+  z-index:100;
+}
+
+.dark header{
+  background:#242526;
+}
+
+.logo{
+  width:45px;
+  height:45px;
+  background:#1877f2;
+  color:#fff;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.container{
+  max-width:700px;
+  margin:20px auto;
+  padding:0 12px;
+}
+
+.card{
+  background:#fff;
+  padding:14px;
+  border-radius:12px;
+  margin-bottom:16px;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+}
+
+.dark .card{
+  background:#242526;
+}
+
+input,textarea{
+  width:100%;
+  border:1px solid #ddd;
+  border-radius:20px;
+  padding:11px 15px;
+  margin:7px 0;
+  background:#f0f2f5;
+  outline:none;
+  font-family:inherit;
+  font-size:15px;
+}
+
+.dark input,
+.dark textarea{
+  background:#3a3b3c;
+  border-color:#555;
+  color:#fff;
+}
+
+input:disabled,textarea:disabled,button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+button{
+  border:0;
+  padding:9px 16px;
+  border-radius:7px;
+  background:#1877f2;
+  color:white;
+  cursor:pointer;
+  font-weight:600;
+}
+
+button:hover:not(:disabled){
+  opacity:.9;
+}
+
+.green{
+  background:#42b72a;
+}
+
+.gray{
+  background:#e4e6eb;
+  color:#050505;
+}
+
+.dark .gray{
+  background:#3a3b3c;
+  color:#fff;
+}
+
+.avatar{
+  width:42px;
+  height:42px;
+  min-width:42px;
+  border-radius:50%;
+  background:#1877f2;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  overflow:hidden;
+}
+
+.post-header{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.post-img{
+  width:100%;
+  max-height:600px;
+  object-fit:cover;
+  border-radius:10px;
+  margin-top:10px;
+  background:#eee;
+}
+
+.post-text{
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+.post-actions{
+  display:flex;
+  border-top:1px solid #ddd;
+  border-bottom:1px solid #ddd;
+  margin-top:10px;
+  padding:5px 0;
+}
+
+.dark .post-actions{
+  border-color:#3a3b3c;
+}
+
+.action-btn{
+  flex:1;
+  text-align:center;
+  padding:9px 4px;
+  border-radius:7px;
+  cursor:pointer;
+  color:#65676b;
+  user-select:none;
+}
+
+.dark .action-btn{
+  color:#b0b3b8;
+}
+
+.action-btn:hover{
+  background:#f0f2f5;
+}
+
+.dark .action-btn:hover{
+  background:#3a3b3c;
+}
+
+.liked{
+  color:#1877f2 !important;
+}
+
+.comment{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+
+.comment-bubble{
+  background:#f0f2f5;
+  padding:8px 12px;
+  border-radius:16px;
+  flex:1;
+  word-break:break-word;
+}
+
+.dark .comment-bubble{
+  background:#3a3b3c;
+}
+
+.comment-box{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-top:10px;
+}
+
+.comment-box input{
+  margin:0;
+}
+
+.chat-messages{
+  height:330px;
+  overflow-y:auto;
+  background:#f0f2f5;
+  border-radius:10px;
+  padding:12px;
+}
+
+.dark .chat-messages{
+  background:#18191a;
+}
+
+.msg{
+  padding:9px 13px;
+  border-radius:18px;
+  margin-bottom:8px;
+  max-width:75%;
+  word-break:break-word;
+}
+
+.msg.me{
+  background:#1877f2;
+  color:white;
+  margin-left:auto;
+}
+
+.msg.other{
+  background:#e4e6eb;
+}
+
+.dark .msg.other{
+  background:#3a3b3c;
+}
+
+.error{
+  color:#e41e3f;
+  font-size:14px;
+  margin:7px 0;
+}
+
+.success{
+  color:#42b72a;
+  font-size:14px;
+}
+
+.empty-state{
+  text-align:center;
+  color:#777;
+  padding:24px 10px;
+  font-size:14px;
+}
+
+.char-count{
+  text-align:right;
+  font-size:12px;
+  color:#999;
+  margin-top:-4px;
+}
+
+.char-count.over{
+  color:#e41e3f;
+}
+
+.top-actions{
+  display:flex;
+  gap:8px;
+}
+
+#loadingScreen{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(120deg,#89f7fe,#66a6ff);
+  z-index:999;
+  font-size:18px;
+  color:#fff;
+  font-weight:600;
+}
+
+#chatbotBtn{
+  position:fixed;right:20px;bottom:20px;width:60px;height:60px;border:0;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:25px;background:#1877f2;color:#fff;
+  box-shadow:0 6px 24px rgba(0,0,0,.28);z-index:200;cursor:pointer;transition:transform .18s,box-shadow .18s;
+}
+#chatbotBtn:hover{transform:translateY(-2px);box-shadow:0 9px 28px rgba(0,0,0,.32)}
+#chatbotBox{
+  position:fixed;right:20px;bottom:92px;width:370px;height:540px;background:#fff;border-radius:18px;
+  box-shadow:0 12px 40px rgba(0,0,0,.28);display:none;flex-direction:column;overflow:hidden;z-index:200;
+  border:1px solid rgba(0,0,0,.08)
+}
+.dark #chatbotBox{background:#242526;color:#fff;border-color:#3a3b3c}
+.bot-header{display:flex;align-items:center;gap:10px;background:#1877f2;color:#fff;padding:13px 14px;font-weight:700}
+.bot-header small{display:block;font-weight:400;opacity:.85;font-size:11px;margin-top:2px}
+.bot-header .bot-spacer{flex:1}
+.bot-head-btn{background:transparent;padding:6px;color:#fff;font-size:15px}
+#chatbotMessages{flex:1;overflow-y:auto;padding:12px;background:linear-gradient(180deg,rgba(24,119,242,.035),transparent)}
+.bot-msg,.user-msg{padding:9px 11px;border-radius:15px;margin:7px 0;max-width:88%;word-break:break-word;line-height:1.42}
+.bot-msg{background:#f0f2f5;color:#111}
+.dark .bot-msg{background:#3a3b3c;color:#fff}
+.user-msg{background:#1877f2;color:#fff;margin-left:auto}
+.bot-msg p{margin:0 0 7px}.bot-msg p:last-child{margin-bottom:0}.bot-msg ul{margin:5px 0 5px 20px;padding:0}.bot-msg code{background:rgba(0,0,0,.08);padding:1px 4px;border-radius:4px}
+.bot-typing{display:inline-flex;gap:4px;align-items:center}.bot-typing i{width:6px;height:6px;border-radius:50%;background:#777;animation:typing 1s infinite}.bot-typing i:nth-child(2){animation-delay:.15s}.bot-typing i:nth-child(3){animation-delay:.3s}
+@keyframes typing{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-2px)}}
+.bot-suggestions{display:flex;gap:6px;overflow-x:auto;padding:8px 10px;border-top:1px solid #ddd}.dark .bot-suggestions{border-color:#3a3b3c}.bot-suggestions button{white-space:nowrap;padding:7px 10px;border-radius:14px;font-size:12px;background:#e4e6eb;color:#111}.dark .bot-suggestions button{background:#3a3b3c;color:#fff}
+.bot-input{display:flex;border-top:1px solid #ddd}.dark .bot-input{border-color:#3a3b3c}.bot-input input{border-radius:0;margin:0;border:0;background:#f0f2f5}.dark .bot-input input{background:#18191a}.bot-input button{border-radius:0;min-width:60px}
+.profile-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.hidden{
+  display:none !important;
+}
+
+.menu-btn{
+  background:transparent;
+  color:#555;
+  font-size:18px;
+  padding:5px 8px;
+}
+
+.dark .menu-btn{
+  color:#ddd;
+}
+
+@media(max-width:600px){
+  header{
+    padding:8px 10px;
+  }
+
+  header h2{
+    font-size:19px;
+  }
+
+  .container{
+    margin-top:10px;
+  }
+
+  .card{
+    border-radius:9px;
+  }
+
+  #chatbotBox{
+    right:10px;
+    bottom:85px;
+    width:calc(100% - 20px);
+  }
+
+  .msg{
+    max-width:85%;
+  }
+}
+
+.bot-tools{display:flex;gap:6px;align-items:center;padding:6px 10px;border-top:1px solid #ddd}
+.dark .bot-tools{border-color:#3a3b3c}
+.bot-tools button{padding:7px 9px;font-size:12px}
+.bot-tools button.active{background:#42b72a}
+.bot-attachment{margin:6px 10px;padding:8px;border-radius:10px;background:#f0f2f5;font-size:12px}
+.dark .bot-attachment{background:#3a3b3c}
+
+</style>
+
+<link rel="stylesheet" href="src/css/platform.css">
+<script src="src/services/firebase-service.js"></script>
+<script src="src/js/social-features.js"></script>
+<script src="src/js/app-modules.js"></script>
+
+
+<style>
+.hc-brand-logo{display:flex;align-items:center;justify-content:center;padding:8px}
+.hc-brand-logo img{width:min(190px,42vw);height:auto;display:block;object-fit:contain}
+</style>
+<link rel="icon" type="image/png" href="assets/happy-chat-logo-app.png"><link rel="apple-touch-icon" href="assets/happy-chat-logo-app.png"></head>
+
+<body>
+<div class="hc-brand-logo" aria-label="Happy Chat">
+  <img src="assets/happy-chat-logo.png" alt="Happy Chat logo">
+</div>
+
+
+<!-- LOADING SCREEN (shown until Firebase resolves auth state) -->
+<div id="loadingScreen">Loading Happy Chat…</div>
+
+<header>
+  <div class="brand">
+    <div class="logo">HC</div>
+    <h2>Happy Chat</h2>
+  </div>
+
+  <div class="top-actions">
+    <button id="darkBtn" class="gray" title="Toggle dark mode">
+      <i class="fa fa-moon"></i>
+    </button>
+
+    <button id="logoutBtn" class="gray hidden">
+      Logout
+    </button>
+  </div>
+</header>
+
+
+<div class="container">
+
+  <!-- LOGIN -->
+  <div id="loginBox" class="card hidden">
+    <h2 style="text-align:center;">Welcome to Happy Chat</h2>
+
+    <input type="email" id="email" placeholder="Email" autocomplete="email">
+
+    <input type="password" id="password" placeholder="Password (min 6 characters)" autocomplete="current-password">
+
+    <input type="password" id="passwordConfirm" placeholder="Confirm password" autocomplete="new-password" class="hidden">
+
+    <div id="authError" class="error"></div>
+
+    <button id="loginBtn" style="width:100%;">
+      Log In
+    </button>
+
+    <button id="signupBtn"
+            class="green"
+            style="width:100%;margin-top:8px;">
+      Create New Account
+    </button>
+
+    <button id="resetBtn"
+            class="gray"
+            style="width:100%;margin-top:8px;">
+      Forgot Password?
+    </button>
+  </div>
+
+
+  <!-- APPLICATION -->
+  <div id="appBox" class="hidden">
+
+    <!-- PROFILE -->
+    <div class="card">
+      <div class="profile-row">
+        <div class="avatar" id="userAvatar">Y</div>
+
+        <div style="flex:1;">
+          <b id="profileEmail"></b>
+          <div style="font-size:13px;color:#777;">
+            Welcome to Happy Chat
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- SEARCH -->
+    <div class="card">
+      <input id="searchInput"
+             placeholder="🔎 Search posts...">
+    </div>
+
+
+    <!-- CREATE POST -->
+    <div class="card">
+
+      <div style="display:flex;gap:10px;">
+        <div class="avatar" id="postAvatar">Y</div>
+
+        <textarea
+          id="postText"
+          rows="2"
+          maxlength="1000"
+          placeholder="What's on your mind?"></textarea>
+      </div>
+
+      <div class="char-count" id="postCharCount">0 / 1000</div>
+
+      <input
+        type="file"
+        id="postImage"
+        accept="image/*">
+
+      <div style="text-align:right;margin-top:5px;">
+        <button id="postBtn">
+          <i class="fa fa-paper-plane"></i>
+          Post
+        </button>
+      </div>
+
+      <div id="postStatus"></div>
+
+    </div>
+
+
+    <!-- FEED -->
+    <div id="feed"></div>
+
+
+    <!-- CHAT -->
+    <div class="card">
+
+      <h3>
+        <i class="fa fa-comments"></i>
+        Live Chat
+      </h3>
+
+      <p style="font-size:13px;color:#777;">
+        Messages are stored in Firebase and visible to all signed-in users.
+        This is not end-to-end encrypted.
+      </p>
+
+      <div class="chat-messages" id="chatBox"></div>
+
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <input
+          type="text"
+          id="chatInput"
+          placeholder="Type a message..."
+          maxlength="500"
+          style="margin:0;">
+
+        <button id="sendBtn">
+          <i class="fa fa-paper-plane"></i>
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+
+<!-- CHATBOT -->
+<div id="chatbotBtn" title="Open Opinion AI">🤖</div>
+
+<div id="chatbotBox" aria-label="Opinion AI">
+  <div class="bot-header">
+    <i class="fa fa-robot"></i>
+    <div><div>Opinion</div><small>AI assistant inside Happy Chat</small></div>
+    <div class="bot-spacer"></div>
+    <button id="botClear" class="bot-head-btn" title="Clear conversation"><i class="fa fa-trash"></i></button>
+    <button id="botClose" class="bot-head-btn" title="Close"><i class="fa fa-xmark"></i></button>
+  </div>
+  <div id="chatbotMessages" aria-live="polite"></div>
+  <div id="botAttachment" class="bot-attachment" style="display:none"></div>
+  <div class="bot-suggestions">
+    <button data-prompt="What can you help me with?">What can you do?</button>
+    <button data-prompt="Explain something to me">Explain</button>
+    <button data-prompt="Help me write something">Help me write</button>
+  </div>
+  <div class="bot-tools">
+    <button id="botFileBtn" title="Attach an image or document"><i class="fa fa-paperclip"></i></button>
+    <button id="botVoiceBtn" title="Voice input"><i class="fa fa-microphone"></i></button>
+    <button id="botWebBtn" title="Toggle web search"><i class="fa fa-globe"></i> Web</button>
+    <button id="botSpeakBtn" title="Read the latest answer aloud"><i class="fa fa-volume-high"></i> Read</button>
+    <button id="botImageBtn" title="Generate an image"><i class="fa fa-image"></i> Image</button>
+    <input id="botFileInput" type="file" hidden accept="image/*,.txt,.md,.csv,.json,.pdf">
+  </div>
+  <div class="bot-input">
+    <input id="botInput" placeholder="Ask Opinion anything..." maxlength="4000" autocomplete="off">
+    <button id="botSend" title="Send"><i class="fa fa-paper-plane"></i></button>
+  </div>
+</div>
+
+
+<script>
+
+/* =========================================================
+   FIREBASE CONFIGURATION
+   -----------------------------------------------------------
+   Replace these with the values from Firebase Console >
+   Project settings > General > Your apps > SDK setup and
+   configuration. These values are safe to expose publicly —
+   real protection comes from the Firestore/Storage security
+   rules (see firestore.rules and storage.rules), NOT from
+   hiding this config.
+   ========================================================= */
+
+const firebaseConfig = {
+  apiKey: "AIzaSyARmDmmyERkOLH2DbBti95Tl0F8crimuHo",
+  authDomain: "opinion-df052.firebaseapp.com",
+  projectId: "opinion-df052",
+  storageBucket: "opinion-df052.firebasestorage.app",
+  messagingSenderId: "469030416455",
+  appId: "1:469030416455:web:8524b3eb357c6db936c162",
+  measurementId: "G-RKM724788Q"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+/* Optional but strongly recommended before launch: App Check
+   guards your Firebase backend against abuse from scripts that
+   aren't your real app. Uncomment and set your reCAPTCHA v3
+   site key (Firebase Console > App Check) once configured:
+
+firebase.appCheck().activate(
+  "YOUR_RECAPTCHA_V3_SITE_KEY",
+  true
+);
+*/
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+let currentUser = null;
+const MAX_POST_LENGTH = 1000;
+const MAX_CHAT_LENGTH = 500;
+const MAX_COMMENT_LENGTH = 300;
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const BOT_MAX_HISTORY = 12;
+const BOT_API_ENDPOINT = "/api/chat"; // Optional secure server endpoint. Never put an AI secret key in this file.
+let botBusy = false;
+let botHistory = [];
+
+
+/* =========================================================
+   SECURITY / HTML ESCAPING
+   ========================================================= */
+
+function escapeHTML(value){
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+/* Map raw Firebase error codes to friendlier text without
+   leaking implementation details. */
+function friendlyError(error){
+
+  const code = error && error.code;
+
+  const map = {
+    "auth/invalid-email":"That email address doesn't look right.",
+    "auth/user-disabled":"This account has been disabled.",
+    "auth/user-not-found":"No account found with that email.",
+    "auth/wrong-password":"Incorrect email or password.",
+    "auth/invalid-credential":"Incorrect email or password.",
+    "auth/email-already-in-use":"An account already exists with that email.",
+    "auth/weak-password":"Password must be at least 6 characters.",
+    "auth/too-many-requests":"Too many attempts. Please wait a moment and try again.",
+    "auth/network-request-failed":"Network error. Check your connection and try again."
+  };
+
+  return map[code] || (error && error.message) || "Something went wrong. Please try again.";
+}
+
+
+/* =========================================================
+   AUTH
+   ========================================================= */
+
+function showError(message){
+  $("#authError").text(message || "");
+}
+
+$("#signupBtn").click(async function(){
+
+  showError("");
+
+  const email = $("#email").val().trim();
+  const password = $("#password").val();
+  const confirm = $("#passwordConfirm").val();
+
+  if(!email || !password){
+    showError("Enter your email and password.");
+    return;
+  }
+
+  if(password.length < 6){
+    showError("Password must contain at least 6 characters.");
+    return;
+  }
+
+  // First click reveals the confirm field so users don't
+  // accidentally create an account with a typo'd password.
+  if($("#passwordConfirm").hasClass("hidden")){
+    $("#passwordConfirm").removeClass("hidden").focus();
+    return;
+  }
+
+  if(password !== confirm){
+    showError("Passwords don't match.");
+    return;
+  }
+
+  $("#signupBtn, #loginBtn, #resetBtn").prop("disabled",true);
+
+  try{
+    await auth.createUserWithEmailAndPassword(email,password);
+  }catch(error){
+    showError(friendlyError(error));
+  }finally{
+    $("#signupBtn, #loginBtn, #resetBtn").prop("disabled",false);
+  }
+});
+
+
+$("#loginBtn").click(async function(){
+
+  showError("");
+
+  const email = $("#email").val().trim();
+  const password = $("#password").val();
+
+  if(!email || !password){
+    showError("Enter your email and password.");
+    return;
+  }
+
+  $("#signupBtn, #loginBtn, #resetBtn").prop("disabled",true);
+
+  try{
+    await auth.signInWithEmailAndPassword(email,password);
+  }catch(error){
+    showError(friendlyError(error));
+  }finally{
+    $("#signupBtn, #loginBtn, #resetBtn").prop("disabled",false);
+  }
+});
+
+
+$("#resetBtn").click(async function(){
+
+  showError("");
+
+  const email = $("#email").val().trim();
+
+  if(!email){
+    showError("Enter your email first.");
+    return;
+  }
+
+  $("#signupBtn, #loginBtn, #resetBtn").prop("disabled",true);
+
+  try{
+    await auth.sendPasswordResetEmail(email);
+    showError("");
+    alert("Password reset email sent.");
+  }catch(error){
+    showError(friendlyError(error));
+  }finally{
+    $("#signupBtn, #loginBtn, #resetBtn").prop("disabled",false);
+  }
+});
+
+
+$("#logoutBtn").click(function(){
+  auth.signOut();
+});
+
+
+let unsubscribePosts = null;
+let unsubscribeChat = null;
+
+auth.onAuthStateChanged(function(user){
+
+  currentUser = user;
+
+  $("#loadingScreen").addClass("hidden");
+
+  if(user){
+
+    $("#loginBox").addClass("hidden");
+    $("#appBox").removeClass("hidden");
+    $("#logoutBtn").removeClass("hidden");
+
+    // Reset login form state for next time.
+    $("#email,#password,#passwordConfirm").val("");
+    $("#passwordConfirm").addClass("hidden");
+    showError("");
+
+    const letter =
+      (user.email || "Y").charAt(0).toUpperCase();
+
+    $("#userAvatar").text(letter);
+    $("#postAvatar").text(letter);
+
+    $("#profileEmail").text(user.email);
+
+    loadPosts();
+    loadChat();
+    if(window.HappyChatSocial){ HappyChatSocial.ensureProfile().catch(console.warn); startHCSocialUI(); }
+
+  }else{
+
+    $("#loginBox").removeClass("hidden");
+    $("#appBox").addClass("hidden");
+    $("#logoutBtn").addClass("hidden");
+
+    if(unsubscribePosts){ unsubscribePosts(); unsubscribePosts = null; }
+    if(unsubscribeChat){ unsubscribeChat(); unsubscribeChat = null; }
+
+  }
+
+});
+
+
+/* =========================================================
+   CREATE POSTS
+   ========================================================= */
+
+$("#postText").on("input",function(){
+
+  const len = $(this).val().length;
+
+  $("#postCharCount")
+    .text(len + " / " + MAX_POST_LENGTH)
+    .toggleClass("over", len > MAX_POST_LENGTH);
+
+});
+
+$("#postBtn").click(async function(){
+
+  if(!currentUser) return;
+
+  const text = $("#postText").val().trim();
+  const file = $("#postImage")[0].files[0];
+
+  if(!text && !file){
+    $("#postStatus").html(
+      '<div class="error">Write something or select an image.</div>'
+    );
+    return;
+  }
+
+  if(text.length > MAX_POST_LENGTH){
+    $("#postStatus").html(
+      '<div class="error">Post is too long (max ' + MAX_POST_LENGTH + ' characters).</div>'
+    );
+    return;
+  }
+
+  if(file){
+
+    if(file.size > MAX_IMAGE_BYTES){
+      $("#postStatus").html(
+        '<div class="error">Image must be smaller than 5 MB.</div>'
+      );
+      return;
+    }
+
+    if(!file.type.startsWith("image/")){
+      $("#postStatus").html(
+        '<div class="error">Please select an image file.</div>'
+      );
+      return;
+    }
+
+  }
+
+  try{
+
+    $("#postBtn").prop("disabled",true);
+    $("#postStatus").html(
+      '<div class="success">Posting...</div>'
+    );
+
+    let imageUrl = "";
+    let imagePath = "";
+
+    if(file){
+
+      const fileName =
+        Date.now() + "_" +
+        file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+
+      imagePath = "posts/" + currentUser.uid + "/" + fileName;
+
+      const ref = storage.ref(imagePath);
+
+      await ref.put(file);
+
+      imageUrl = await ref.getDownloadURL();
+    }
+
+    await db.collection("posts").add({
+
+      text:text,
+      imgUrl:imageUrl,
+      imgPath:imagePath,
+
+      user:currentUser.email,
+      uid:currentUser.uid,
+
+      time:firebase.firestore.FieldValue.serverTimestamp(),
+
+      reactions:{},
+      comments:[]
+
+    });
+
+    $("#postText").val("").trigger("input");
+    $("#postImage").val("");
+
+    $("#postStatus").html(
+      '<div class="success">Posted successfully!</div>'
+    );
+
+    setTimeout(()=>{
+      $("#postStatus").html("");
+    },2000);
+
+  }catch(error){
+
+    $("#postStatus").html(
+      '<div class="error">' +
+      escapeHTML(friendlyError(error)) +
+      '</div>'
+    );
+
+  }finally{
+
+    $("#postBtn").prop("disabled",false);
+
+  }
+
+});
+
+
+/* =========================================================
+   LOAD POSTS
+   ========================================================= */
+
+function loadPosts(){
+
+  if(unsubscribePosts) unsubscribePosts();
+
+  unsubscribePosts = db.collection("posts")
+    .orderBy("time","desc")
+    .limit(50)
+    .onSnapshot(snapshot=>{
+
+      if(snapshot.empty){
+        $("#feed").html(
+          '<div class="card empty-state">No posts yet — be the first to share something! 📝</div>'
+        );
+        return;
+      }
+
+      $("#feed").html("");
+
+      snapshot.forEach(doc=>{
+
+        const post = doc.data();
+        const id = doc.id;
+
+        const reactions = post.reactions || {};
+
+        const totalLikes =
+          Object.keys(reactions).length;
+
+        const liked =
+          !!reactions[currentUser.uid];
+
+        const comments =
+          post.comments || [];
+
+        const canDelete =
+          post.uid === currentUser.uid;
+
+        let commentsHTML = "";
+
+        comments.forEach(comment=>{
+
+          commentsHTML += `
+            <div class="comment">
+
+              <div class="avatar"
+                   style="width:32px;height:32px;min-width:32px;font-size:12px;">
+                ${escapeHTML(
+                  (comment.user || "U")[0].toUpperCase()
+                )}
+              </div>
+
+              <div class="comment-bubble">
+                <b>${escapeHTML(comment.user)}</b>
+                <br>
+                ${escapeHTML(comment.text)}
+              </div>
+
+            </div>
+          `;
+
+        });
+
+
+        const deleteButton = canDelete
+          ? `<button class="menu-btn deletePost" title="Delete post">
+               <i class="fa fa-trash"></i>
+             </button>`
+          : "";
+
+
+        const imageHTML = post.imgUrl
+          ? `<img src="${escapeHTML(post.imgUrl)}"
+                  class="post-img"
+                  loading="lazy"
+                  alt="Post image">`
+          : "";
+
+
+        $("#feed").append(`
+
+          <div class="card post"
+               data-id="${escapeHTML(id)}"
+               data-img-path="${escapeHTML(post.imgPath || "")}">
+
+            <div class="post-header">
+
+              <div class="avatar">
+                ${escapeHTML(
+                  (post.user || "U")[0].toUpperCase()
+                )}
+              </div>
+
+              <div style="flex:1;">
+                <b>${escapeHTML(post.user)}</b>
+
+                <br>
+
+                <span style="font-size:12px;color:#777;">
+                  ${timeAgo(post.time)}
+                </span>
+              </div>
+
+              ${deleteButton}
+
+            </div>
+
+
+            <div class="post-text" style="margin-top:10px;">
+              ${escapeHTML(post.text)}
+            </div>
+
+            ${imageHTML}
+
+
+            <div class="reaction-bar"
+                 style="display:flex;margin-top:10px;">
+
+              <span>
+                👍 ${totalLikes}
+              </span>
+
+              <span style="margin-left:auto;">
+                ${comments.length} Comments
+              </span>
+
+            </div>
+
+
+            <div class="post-actions">
+
+              <div class="action-btn reactBtn
+                ${liked ? "liked" : ""}">
+
+                <i class="fa fa-thumbs-up"></i>
+                ${liked ? "Liked" : "Like"}
+
+              </div>
+
+              <div class="action-btn commentToggle">
+
+                <i class="fa fa-comment"></i>
+                Comment
+
+              </div>
+
+              <div class="action-btn shareBtn">
+
+                <i class="fa fa-share"></i>
+                Share
+
+              </div>
+
+            </div>
+
+
+            <div class="comments-section"
+                 style="display:none;">
+
+              ${commentsHTML}
+
+              <div class="comment-box">
+
+                <div class="avatar"
+                     style="width:32px;height:32px;min-width:32px;font-size:12px;">
+                  ${escapeHTML(
+                    currentUser.email[0].toUpperCase()
+                  )}
+                </div>
+
+                <input
+                  class="commentInput"
+                  maxlength="${MAX_COMMENT_LENGTH}"
+                  placeholder="Write a comment...">
+
+                <button class="sendComment">
+                  <i class="fa fa-paper-plane"></i>
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        `);
+
+      });
+
+      filterPosts();
+
+    },error=>{
+
+      $("#feed").html(
+        '<div class="card error">Couldn\'t load posts: ' +
+        escapeHTML(friendlyError(error)) +
+        '</div>'
+      );
+
+    });
+}
+
+
+/* =========================================================
+   LIKE / UNLIKE
+   ========================================================= */
+
+$(document).on("click",".reactBtn",async function(){
+
+  if(!currentUser) return;
+
+  const button = $(this);
+  if(button.hasClass("busy")) return;
+  button.addClass("busy");
+
+  const id =
+    $(this).closest(".post").data("id");
+
+  const ref =
+    db.collection("posts").doc(id);
+
+  try{
+
+    const snap = await ref.get();
+
+    if(!snap.exists) return;
+
+    const data = snap.data();
+    const reactions = data.reactions || {};
+
+    if(reactions[currentUser.uid]){
+
+      await ref.update({
+        [`reactions.${currentUser.uid}`]:
+          firebase.firestore.FieldValue.delete()
+      });
+
+    }else{
+
+      await ref.update({
+        [`reactions.${currentUser.uid}`]:1
+      });
+
+    }
+
+  }catch(error){
+
+    alert(friendlyError(error));
+
+  }finally{
+
+    button.removeClass("busy");
+
+  }
+
+});
+
+
+/* =========================================================
+   COMMENTS
+   ========================================================= */
+
+$(document).on("click",".commentToggle",function(){
+
+  $(this)
+    .closest(".post")
+    .find(".comments-section")
+    .slideToggle(150);
+
+});
+
+
+$(document).on("click",".sendComment",async function(){
+
+  if(!currentUser) return;
+
+  const button = $(this);
+  if(button.prop("disabled")) return;
+
+  const post =
+    $(this).closest(".post");
+
+  const id =
+    post.data("id");
+
+  const input =
+    post.find(".commentInput");
+
+  const text =
+    input.val().trim();
+
+  if(!text) return;
+
+  if(text.length > MAX_COMMENT_LENGTH){
+    alert("Comment is too long (max " + MAX_COMMENT_LENGTH + " characters).");
+    return;
+  }
+
+  button.prop("disabled",true);
+
+  try{
+
+    await db.collection("posts")
+      .doc(id)
+      .update({
+
+        comments:
+          firebase.firestore.FieldValue.arrayUnion({
+
+            uid:currentUser.uid,
+            user:currentUser.email,
+            text:text,
+            time:Date.now()
+
+          })
+
+      });
+
+    input.val("");
+
+  }catch(error){
+
+    alert(friendlyError(error));
+
+  }finally{
+
+    button.prop("disabled",false);
+
+  }
+
+});
+
+
+$(document).on("keypress",".commentInput",function(e){
+
+  if(e.which === 13){
+    $(this)
+      .closest(".comment-box")
+      .find(".sendComment")
+      .click();
+  }
+
+});
+
+
+/* =========================================================
+   DELETE POSTS
+   ========================================================= */
+
+$(document).on("click",".deletePost",async function(){
+
+  if(!confirm("Delete this post?")) return;
+
+  const post = $(this).closest(".post");
+  const id = post.data("id");
+  const imgPath = post.data("img-path");
+
+  try{
+
+    await db.collection("posts")
+      .doc(id)
+      .delete();
+
+    // Clean up the stored image so orphaned files don't pile
+    // up in Storage. Ignore failures here (rules already
+    // scope deletes to the owner, and the doc is gone either way).
+    if(imgPath){
+      storage.ref(imgPath).delete().catch(()=>{});
+    }
+
+  }catch(error){
+
+    alert(friendlyError(error));
+
+  }
+
+});
+
+
+/* =========================================================
+   SHARE
+   ========================================================= */
+
+$(document).on("click",".shareBtn",async function(){
+
+  try{
+
+    if(navigator.share){
+
+      await navigator.share({
+        title:"Happy Chat",
+        text:"Check out Happy Chat!",
+        url:window.location.href
+      });
+
+    }else{
+
+      await navigator.clipboard.writeText(
+        window.location.href
+      );
+
+      alert("Happy Chat link copied!");
+
+    }
+
+  }catch(error){
+
+    // User cancelled sharing.
+  }
+
+});
+
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+$("#searchInput").on("input",function(){
+
+  filterPosts();
+
+});
+
+
+function filterPosts(){
+
+  const query =
+    $("#searchInput")
+      .val()
+      .toLowerCase()
+      .trim();
+
+  $(".post").each(function(){
+
+    const content =
+      $(this).text().toLowerCase();
+
+    $(this).toggle(
+      !query || content.includes(query)
+    );
+
+  });
+
+}
+
+
+/* =========================================================
+   TIME AGO
+   ========================================================= */
+
+function timeAgo(timestamp){
+
+  if(!timestamp) return "just now";
+
+  let date;
+
+  try{
+    date = timestamp.toDate();
+  }catch(e){
+    date = new Date();
+  }
+
+  const seconds =
+    Math.floor(
+      (Date.now() - date.getTime()) / 1000
+    );
+
+  if(seconds < 60)
+    return "just now";
+
+  if(seconds < 3600)
+    return Math.floor(seconds / 60) + "m ago";
+
+  if(seconds < 86400)
+    return Math.floor(seconds / 3600) + "h ago";
+
+  if(seconds < 2592000)
+    return Math.floor(seconds / 86400) + "d ago";
+
+  if(seconds < 31536000)
+    return Math.floor(seconds / 2592000) + "mo ago";
+
+  return Math.floor(seconds / 31536000) + "y ago";
+}
+
+
+/* =========================================================
+   LIVE CHAT
+   ========================================================= */
+
+$("#sendBtn").click(sendChatMessage);
+
+$("#chatInput").keypress(function(e){
+
+  if(e.which === 13){
+    sendChatMessage();
+  }
+
+});
+
+
+async function sendChatMessage(){
+
+  if(!currentUser) return;
+
+  if($("#sendBtn").prop("disabled")) return;
+
+  const input = $("#chatInput");
+
+  const message =
+    input.val().trim();
+
+  if(!message) return;
+
+  if(message.length > MAX_CHAT_LENGTH){
+    alert("Message is too long (max " + MAX_CHAT_LENGTH + " characters).");
+    return;
+  }
+
+  $("#sendBtn").prop("disabled",true);
+
+  try{
+
+    await db.collection("chat").add({
+
+      text:message,
+
+      user:currentUser.email,
+
+      uid:currentUser.uid,
+
+      time:firebase.firestore.FieldValue.serverTimestamp()
+
+    });
+
+    input.val("");
+
+  }catch(error){
+
+    alert(friendlyError(error));
+
+  }finally{
+
+    $("#sendBtn").prop("disabled",false);
+
+  }
+
+}
+
+
+function loadChat(){
+
+  if(unsubscribeChat) unsubscribeChat();
+
+  unsubscribeChat = db.collection("chat")
+    .orderBy("time","desc")
+    .limit(100)
+    .onSnapshot(snapshot=>{
+
+      if(snapshot.empty){
+        $("#chatBox").html(
+          '<div class="empty-state">No messages yet — say hello! 👋</div>'
+        );
+        return;
+      }
+
+      const docs = [];
+      snapshot.forEach(doc=>docs.push(doc));
+      docs.reverse();
+
+      $("#chatBox").html("");
+
+      docs.forEach(doc=>{
+
+        const message = doc.data();
+
+        const mine =
+          message.uid === currentUser.uid;
+
+        $("#chatBox").append(`
+
+          <div class="msg ${mine ? "me" : "other"}">
+
+            <b>
+              ${escapeHTML(
+                (message.user || "User")
+                  .split("@")[0]
+              )}
+            </b>
+
+            <br>
+
+            ${escapeHTML(message.text)}
+
+          </div>
+
+        `);
+
+      });
+
+      const box = $("#chatBox")[0];
+
+      if(box){
+        box.scrollTop = box.scrollHeight;
+      }
+
+    },error=>{
+
+      $("#chatBox").html(
+        '<div class="error">Couldn\'t load chat: ' +
+        escapeHTML(friendlyError(error)) +
+        '</div>'
+      );
+
+    });
+
+}
+
+
+/* =========================================================
+   OPINION AI — upgraded multimodal assistant
+   ========================================================= */
+
+function botStorageKey(){ return "opinionHistory_" + (currentUser ? currentUser.uid : "guest"); }
+function escapeBotHTML(value){ return escapeHTML(value); }
+
+function renderBotText(value){
+  let safe=escapeBotHTML(value);
+  safe=safe.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+  safe=safe.replace(/`([^`]+)`/g,"<code>$1</code>");
+  safe=safe.replace(/^[-•] (.+)$/gm,"<li>$1</li>");
+  safe=safe.replace(/(<li>.*<\/li>\n?)+/g,m=>"<ul>"+m+"</ul>");
+  return safe.split(/\n{2,}/).map(x=>"<p>"+x.replace(/\n/g,"<br>")+"</p>").join("");
+}
+function saveBotHistory(){try{localStorage.setItem(botStorageKey(),JSON.stringify(botHistory.slice(-BOT_MAX_HISTORY)));}catch(e){}}
+function loadBotHistory(){
+  botHistory=[];
+  try{const raw=JSON.parse(localStorage.getItem(botStorageKey())||"[]");if(Array.isArray(raw))botHistory=raw.slice(-BOT_MAX_HISTORY);}catch(e){}
+  renderBotHistory();
+}
+function renderBotHistory(){
+  const box=$("#chatbotMessages"); box.empty();
+  if(!botHistory.length){
+    addBotMessage("Hello! 👋 I'm **Opinion**. I can chat, explain, analyze images and documents, search the web when enabled, and read answers aloud.",false,false);
+    return;
+  }
+  botHistory.forEach(m=>addBotMessage(m.content,m.role==="user",false));
+}
+function addBotMessage(text,user,remember=true){
+  const safe=renderBotText(text);
+  $("#chatbotMessages").append(user?`<div class="user-msg">${safe}</div>`:`<div class="bot-msg">${safe}</div>`);
+  const box=$("#chatbotMessages")[0];if(box)box.scrollTop=box.scrollHeight;
+  if(remember){botHistory.push({role:user?"user":"assistant",content:String(text)});botHistory=botHistory.slice(-BOT_MAX_HISTORY);saveBotHistory();}
+}
+function showBotTyping(){
+  $("#botTyping").remove();
+  $("#chatbotMessages").append('<div id="botTyping" class="bot-msg"><span class="bot-typing"><i></i><i></i><i></i></span></div>');
+  const box=$("#chatbotMessages")[0];if(box)box.scrollTop=box.scrollHeight;
+}
+function hideBotTyping(){$("#botTyping").remove();}
+
+let botAttachment=null;
+let botWebSearch=true;
+let lastBotAnswer="";
+
+function setAttachment(file){
+  botAttachment=file||null;
+  const box=$("#botAttachment");
+  if(!file){box.hide().empty();return;}
+  box.text("Attached: "+file.name+" ("+Math.round(file.size/1024)+" KB)").show();
+}
+
+async function fileToDataURL(file){
+  return await new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(String(r.result));
+    r.onerror=reject;
+    r.readAsDataURL(file);
+  });
+}
+
+async function askSecureAI(text){
+  if(!currentUser) throw new Error("Please sign in first.");
+  const token=await currentUser.getIdToken();
+  const payload={message:text,history:botHistory.slice(-BOT_MAX_HISTORY),webSearch:botWebSearch};
+  if(botAttachment){
+    if(botAttachment.size>7*1024*1024) throw new Error("That attachment is too large. Please use a file under 7 MB.");
+    const data=await fileToDataURL(botAttachment);
+    if(botAttachment.type.startsWith("image/")) payload.imageData=data;
+    else payload.fileData=data,payload.fileName=botAttachment.name;
+  }
+  const response=await fetch(BOT_API_ENDPOINT,{
+    method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+    body:JSON.stringify(payload)
+  });
+  let data={};try{data=await response.json();}catch(e){}
+  if(!response.ok)throw new Error(data.error||"Opinion AI service unavailable.");
+  return data.reply;
+}
+
+async function sendBotMessage(){
+  if(botBusy)return;
+  const input=$("#botInput"),text=input.val().trim();
+  if(!text)return;
+  botBusy=true;$("#botSend").prop("disabled",true);input.val("");addBotMessage(text,true);showBotTyping();
+  try{
+    const answer=await askSecureAI(text);
+    hideBotTyping();lastBotAnswer=answer;addBotMessage(answer,false);setAttachment(null);
+  }catch(e){
+    hideBotTyping();addBotMessage("I couldn't complete that request: "+(e.message||"Please try again."),false);
+  }finally{
+    botBusy=false;$("#botSend").prop("disabled",false);input.focus();
+  }
+}
+
+$("#chatbotBtn").click(function(){
+  const open=$("#chatbotBox").is(":visible");$("#chatbotBox").css("display",open?"none":"flex");
+  if(!open){loadBotHistory();setTimeout(()=>$("#botInput").focus(),50);}
+});
+$("#botClose").click(()=>$("#chatbotBox").hide());
+$("#botClear").click(()=>{botHistory=[];saveBotHistory();renderBotHistory();});
+$("#botSend").click(sendBotMessage);
+$("#botInput").keypress(e=>{if(e.which===13)sendBotMessage();});
+$(document).on("click",".bot-suggestions button",function(){$("#botInput").val($(this).data("prompt"));sendBotMessage();});
+
+$("#botFileBtn").click(()=>$("#botFileInput").click());
+$("#botFileInput").on("change",function(){setAttachment(this.files&&this.files[0]?this.files[0]:null);});
+$("#botWebBtn").click(function(){
+  botWebSearch=!botWebSearch;
+  $(this).toggleClass("active",botWebSearch);
+  $(this).attr("title",botWebSearch?"Web search is on":"Web search is off");
+});
+$("#botWebBtn").addClass("active");
+
+$("#botImageBtn").click(async function(){
+  const prompt=$("#botInput").val().trim();
+  if(!prompt){addBotMessage("Type an image description first, then tap Image.",false);return;}
+  if(!currentUser){addBotMessage("Please sign in first.",false);return;}
+  const btn=$(this); btn.prop("disabled",true); addBotMessage("Creating your image…",false);
+  try{
+    const token=await currentUser.getIdToken();
+    const r=await fetch("/api/image",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({prompt})});
+    const d=await r.json(); if(!r.ok||!d.image) throw new Error(d.error||"Image generation failed.");
+    $("#chatbotMessages").append('<div class="bot-msg"><img src="'+escapeHTML(d.image)+'" alt="Generated by Opinion" style="max-width:100%;border-radius:12px"></div>');
+    const box=$("#chatbotMessages")[0]; if(box)box.scrollTop=box.scrollHeight; $("#botInput").val("");
+  }catch(e){addBotMessage("I couldn't generate the image: "+(e.message||"Please try again."),false);}
+  finally{btn.prop("disabled",false);}
+});
+
+$("#botVoiceBtn").click(function(){
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SpeechRecognition){addBotMessage("Voice input isn't supported by this browser. You can still type your message.",false);return;}
+  const rec=new SpeechRecognition();
+  rec.lang=navigator.language||"en-US";rec.interimResults=false;rec.maxAlternatives=1;
+  $(this).prop("disabled",true).addClass("active");
+  rec.onresult=e=>{$("#botInput").val(e.results[0][0].transcript);};
+  rec.onerror=()=>addBotMessage("I couldn't hear that. Please try again.",false);
+  rec.onend=()=>$("#botVoiceBtn").prop("disabled",false).removeClass("active");
+  rec.start();
+});
+
+$("#botSpeakBtn").click(async function(){
+  if(!lastBotAnswer){addBotMessage("There is no Opinion answer to read yet.",false);return;}
+  if("speechSynthesis" in window){
+    window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(lastBotAnswer);u.lang=navigator.language||"en-US";
+    window.speechSynthesis.speak(u);
+    return;
+  }
+  try{
+    const token=currentUser?await currentUser.getIdToken():"";
+    const r=await fetch("/api/speak",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({text:lastBotAnswer})});
+    if(!r.ok)throw new Error("Speech unavailable");
+    const blob=await r.blob();new Audio(URL.createObjectURL(blob)).play();
+  }catch(e){addBotMessage("Voice playback is unavailable right now.",false);}
+});
+
+/* =========================================================
+   DARK MODE
+   ========================================================= */
+
+$("#darkBtn").click(function(){
+
+  $("body").toggleClass("dark");
+
+  const dark =
+    $("body").hasClass("dark");
+
+  try{
+    localStorage.setItem("happyChatDark", dark ? "1" : "0");
+  }catch(e){
+    // localStorage may be unavailable (e.g. private browsing) — safe to ignore.
+  }
+
+  $(this).html(
+    dark
+      ? '<i class="fa fa-sun"></i>'
+      : '<i class="fa fa-moon"></i>'
+  );
+
+});
+
+
+try{
+  if(localStorage.getItem("happyChatDark") === "1"){
+
+    $("body").addClass("dark");
+
+    $("#darkBtn").html(
+      '<i class="fa fa-sun"></i>'
+    );
+
+  }
+}catch(e){
+  // localStorage may be unavailable — default to light mode.
+}
+
+</script>
+
+
+<style>
+#hcSocialPanel{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:none;align-items:flex-end;justify-content:center}
+#hcSocialPanel .hc-sheet{width:min(680px,100%);max-height:85vh;overflow:auto;background:var(--card-bg,#fff);border-radius:20px 20px 0 0;padding:18px;box-shadow:0 -8px 30px rgba(0,0,0,.2)}
+#hcSocialPanel .hc-row{display:flex;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.08)}
+#hcSocialPanel input,#hcSocialPanel textarea{width:100%;box-sizing:border-box;padding:11px;border:1px solid #ddd;border-radius:10px;margin:6px 0}
+#hcSocialPanel button{border:0;border-radius:10px;padding:10px 14px;cursor:pointer}
+.dark #hcSocialPanel .hc-sheet{background:#242526;color:#fff}.dark #hcSocialPanel input,.dark #hcSocialPanel textarea{background:#18191a;color:#fff;border-color:#444}
+</style>
+<div id="hcSocialPanel" aria-hidden="true"><div class="hc-sheet"><div style="display:flex;justify-content:space-between;align-items:center"><h3 id="hcSocialTitle" style="margin:0">Happy Chat</h3><button id="hcSocialClose">✕</button></div><div id="hcSocialContent"></div></div></div>
+<script>
+let hcNotificationOff=null;
+function hcOpen(title,html){$('#hcSocialTitle').text(title);$('#hcSocialContent').html(html);$('#hcSocialPanel').css('display','flex').attr('aria-hidden','false');}
+function hcClose(){$('#hcSocialPanel').hide().attr('aria-hidden','true');}
+function startHCSocialUI(){
+  if(window.__hcSocialStarted) return; window.__hcSocialStarted=true;
+  $('#hcSocialClose').on('click',hcClose); $('#hcSocialPanel').on('click',function(e){if(e.target===this)hcClose();});
+  $('[data-hc-nav="home"]').on('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+  $('[data-hc-nav="search"]').on('click',()=>{$('#searchInput').focus();window.scrollTo({top:0,behavior:'smooth'});});
+  $('[data-hc-nav="messages"]').on('click',()=>{document.getElementById('chatInput')?.focus();document.getElementById('chatBox')?.scrollIntoView({behavior:'smooth'});});
+  $('[data-hc-nav="profile"]').on('click',async()=>{
+    const p=await HappyChatSocial.ensureProfile();
+    hcOpen('My Profile',`<div class="hc-row"><div class="avatar">${escapeHTML((p.displayName||p.email||'U')[0].toUpperCase())}</div><div><b>${escapeHTML(p.displayName||'User')}</b><br><small>${escapeHTML(p.email||'')}</small></div></div><label>Display name<input id="hcName" maxlength="60" value="${escapeHTML(p.displayName||'')}"></label><label>Bio<textarea id="hcBio" maxlength="300" rows="3">${escapeHTML(p.bio||'')}</textarea></label><button id="hcSaveProfile">Save profile</button>`);
+    $('#hcSaveProfile').on('click',async()=>{try{await HappyChatSocial.updateProfile({displayName:$('#hcName').val(),bio:$('#hcBio').val()});alert('Profile saved.');hcClose();}catch(e){alert(e.message||'Could not save profile.')}});
+  });
+  $('[data-hc-nav="notifications"]').on('click',async()=>{
+    const snap=await db.collection('notifications').where('uid','==',currentUser.uid).limit(30).get();
+    const rows=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));
+    const html=rows.length?rows.map(n=>`<div class="hc-row"><div style="flex:1"><b>${escapeHTML(n.actorEmail||'Someone')}</b> ${escapeHTML(n.type||'activity')}<br><small>${n.createdAt?.toDate?n.createdAt.toDate().toLocaleString():''}</small></div>${n.read?'':'<button class="hcMarkRead" data-id="'+escapeHTML(n.id)+'">Mark read</button>'}</div>`).join(''):'<p>No notifications yet.</p>';
+    hcOpen('Notifications',html); $('.hcMarkRead').on('click',async function(){await HappyChatSocial.markNotificationRead($(this).data('id'));$(this).closest('.hc-row').remove();});
+  });
+  if(hcNotificationOff) hcNotificationOff();
+  hcNotificationOff=HappyChatSocial.listenNotifications(list=>{const unread=list.filter(x=>!x.read).length; const b=$('[data-hc-nav="notifications"]'); b.attr('title',unread?unread+' unread notifications':'Notifications');});
+}
+</script>
+
+<nav class="hc-bottom-nav" aria-label="Main navigation">
+  <button type="button" data-hc-nav="home"><i class="fa fa-house"></i><br>Home</button>
+  <button type="button" data-hc-nav="search"><i class="fa fa-magnifying-glass"></i><br>Search</button>
+  <button type="button" data-hc-nav="messages"><i class="fa fa-message"></i><br>Messages</button>
+  <button type="button" data-hc-nav="notifications"><i class="fa fa-bell"></i><br>Alerts</button>
+  <button type="button" data-hc-nav="profile"><i class="fa fa-user"></i><br>Profile</button>
+</nav>
+
+</body>
+</html>

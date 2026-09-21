@@ -1,0 +1,12 @@
+
+/* Happy Chat platform polish: mobile-first, accessible, responsive. */
+:root{--hc-radius:14px;--hc-shadow:0 4px 18px rgba(0,0,0,.08)}
+.hc-card{border-radius:var(--hc-radius);box-shadow:var(--hc-shadow);background:var(--card-bg,#fff)}
+.hc-action{min-height:40px;border:0;border-radius:10px;padding:8px 12px;cursor:pointer}
+.hc-action:focus-visible{outline:3px solid #1877f2;outline-offset:2px}
+.hc-bottom-nav{display:none}
+@media(max-width:700px){
+ .hc-bottom-nav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:1000;justify-content:space-around;padding:8px;background:var(--card-bg,#fff);box-shadow:0 -3px 14px rgba(0,0,0,.12)}
+ .hc-bottom-nav button{background:transparent;border:0;padding:7px;font-size:12px}
+ body{padding-bottom:64px}
+}
